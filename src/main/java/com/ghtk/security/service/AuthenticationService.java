@@ -6,7 +6,7 @@ import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
 import com.ghtk.repository.UserRepository;
 import com.ghtk.request.LoginRequest;
-import com.ghtk.request.RegisterRequest;
+import com.ghtk.request.ShopRegisterRequest;
 import com.ghtk.response.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,10 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -46,19 +43,19 @@ public class AuthenticationService {
     @Autowired
     private final RedisTemplate redisTemplate;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) throws Exception{
-        if (userRepository.existsByUsername(registerRequest.getUsername()) == 1) {
+    public AuthenticationResponse register(ShopRegisterRequest shopRegisterRequest) throws Exception{
+        if (userRepository.existsByUsername(shopRegisterRequest.getUsername()) == 1) {
             throw new Exception("Username is already taken");
         }
         var user = User.builder()
-                .username(registerRequest.getUsername())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(registerRequest.getRole())
+                .username(shopRegisterRequest.getUsername())
+                .password(passwordEncoder.encode(shopRegisterRequest.getPassword()))
+                .role(shopRegisterRequest.getRole())
                 .build();
         var shop = Shop.builder()
-                .name(registerRequest.getName())
-                .address(registerRequest.getAddress())
-                .phone(registerRequest.getPhone())
+                .name(shopRegisterRequest.getName())
+                .address(shopRegisterRequest.getAddress())
+                .phone(shopRegisterRequest.getPhone())
                 .user(user)
                 .build();
         userRepository.save(user);
@@ -69,13 +66,6 @@ public class AuthenticationService {
         redisTemplate.opsForValue().set("access_token_" + user.getId(), jwtToken);
         redisTemplate.opsForValue().set("refresh_token_" + user.getId(), refreshToken);
 
-        //Test
-        System.out.println("Value of redis: \n"
-                + user.getId()
-                + "\n"
-                + redisTemplate.opsForValue().get("access_token_" + user.getId())
-                + "\n"
-                + redisTemplate.opsForValue().get("refresh_token_" + user.getId())) ;
 
         return AuthenticationResponse.builder()
                 .access_token(jwtToken)
@@ -97,14 +87,6 @@ public class AuthenticationService {
 
         redisTemplate.opsForValue().set("access_token_" + user.getId(), jwtToken);
         redisTemplate.opsForValue().set("refresh_token_" + user.getId(), refreshToken);
-
-        //Test
-        System.out.println("Value of redis: \n"
-                + user.getId()
-                + "\n"
-                + redisTemplate.opsForValue().get("access_token_" + user.getId())
-                + "\n"
-                + redisTemplate.opsForValue().get("refresh_token_" + user.getId())) ;
 
 
         return AuthenticationResponse.builder()

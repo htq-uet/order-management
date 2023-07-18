@@ -1,7 +1,7 @@
 package com.ghtk.controller;
 
 import com.ghtk.request.LoginRequest;
-import com.ghtk.request.RegisterRequest;
+import com.ghtk.request.ShopRegisterRequest;
 import com.ghtk.response.AuthenticationResponse;
 import com.ghtk.security.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,9 +27,9 @@ public class Authentication {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @Valid @RequestBody RegisterRequest registerRequest
+            @Valid @RequestBody ShopRegisterRequest shopRegisterRequest
     ) throws Exception {
-        return ResponseEntity.ok(authenticationService.register(registerRequest));
+        return ResponseEntity.ok(authenticationService.register(shopRegisterRequest));
     }
 
     @PostMapping("/login")

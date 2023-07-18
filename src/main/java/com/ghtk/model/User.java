@@ -20,10 +20,9 @@ import java.util.List;
 @Table(name = "user")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "increment")
+    @GeneratedValue(generator = "increment")
     private int id;
     private String username;
-    @Size(min = 8, max = 16)
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -39,8 +38,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //return role.getAuthorities();
-        return null;
+        return role.getAuthorities();
     }
 
     @Override

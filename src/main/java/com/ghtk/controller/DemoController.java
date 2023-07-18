@@ -6,11 +6,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/demo")
+@RequestMapping("")
 public class DemoController {
 
-    @GetMapping
-    public ResponseEntity<String> demo() {
+    @GetMapping("/shop/demo")
+    public ResponseEntity<String> shopDemo() {
+        System.out.println("Hello World!");
+        return ResponseEntity.ok("Hello World!");
+    }
+
+    @GetMapping("/staff/demo")
+    public ResponseEntity<String> staffDemo() {
         System.out.println("Hello World!");
         return ResponseEntity.ok("Hello World!");
     }
