@@ -1,5 +1,6 @@
 package com.ghtk.controller.shop.staff_management;
 
+import com.ghtk.request.DeleteRequest;
 import com.ghtk.request.StaffRegisterRequest;
 import com.ghtk.request.StaffUpdateRequest;
 import com.ghtk.service.UserService;
@@ -36,5 +37,10 @@ public class StaffAccountController {
             HttpServletResponse response
     ) {
        return ResponseEntity.ok(userService.updateStaff(staffUpdateRequest, request , response));
+    }
+
+    @DeleteMapping("/delete_staff")
+    public ResponseEntity<String> deleteStaffAccount(@RequestBody DeleteRequest deleteRequest) {
+       return ResponseEntity.ok(userService.deleteStaff(deleteRequest));
     }
 }

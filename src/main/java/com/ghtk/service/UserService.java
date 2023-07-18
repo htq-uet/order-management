@@ -5,6 +5,7 @@ import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
 import com.ghtk.repository.StaffRepository;
 import com.ghtk.repository.UserRepository;
+import com.ghtk.request.DeleteRequest;
 import com.ghtk.request.StaffRegisterRequest;
 
 import com.ghtk.request.StaffUpdateRequest;
@@ -117,5 +118,12 @@ public class UserService {
                 .build();
         staffRepository.save(staff);
         return "Update staff successfully";
+    }
+
+    public String deleteStaff(DeleteRequest deleteRequest) {
+        var user_id = staffRepository.findUserIdById(deleteRequest.getId());
+        staffRepository.deleteById((long) deleteRequest.getId());
+        userRepository.deleteById(user_id);
+        return "Delete staff successfully";
     }
 }

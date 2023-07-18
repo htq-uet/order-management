@@ -1,4 +1,4 @@
-package com.ghtk.controller;
+package com.ghtk.controller.auth;
 
 import com.ghtk.request.LoginRequest;
 import com.ghtk.request.ShopRegisterRequest;

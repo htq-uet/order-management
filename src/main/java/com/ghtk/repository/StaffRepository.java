@@ -12,4 +12,11 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     int findShopIdByStaffId(int staffId);
 
 
+    @Query(
+            value = "SELECT user_id FROM staff WHERE id = ?1",
+            nativeQuery = true
+    )
+    Integer findUserIdById(int staffId);
+
+
 }

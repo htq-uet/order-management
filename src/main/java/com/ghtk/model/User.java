@@ -20,7 +20,7 @@ import java.util.List;
 @Table(name = "user")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(generator = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "increment")
     private int id;
     private String username;
     private String password;
