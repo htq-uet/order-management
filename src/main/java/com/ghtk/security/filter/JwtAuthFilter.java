@@ -1,5 +1,6 @@
 package com.ghtk.security.filter;
 
+import com.ghtk.repository.UserRepository;
 import com.ghtk.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +28,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Autowired
+    private final UserRepository userRepository;
+
+    @Autowired
     private final JwtService jwtService;
+
+    @Autowired
+    private final RedisTemplate template;
 
     @Override
     protected void doFilterInternal(
@@ -41,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Beared ")) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,7 +58,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         username = jwtService.extractUsername(jwt);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            System.out.println(template.opsForValue().get("access_token_" + userRepository.findIdByUsername(username)));
+            if (
+                    jwtService.isTokenValid(jwt, userDetails) &&
+                            template.opsForValue().get("access_token_" + userRepository.findIdByUsername(username)) != null)
+            {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
