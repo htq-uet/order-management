@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -79,8 +80,8 @@ public class UserService {
         jwt = authorizationHeader.substring(7);
         username = jwtService.extractUsername(jwt);
         if (staffRepository.findShopIdByStaffId(staffUpdateRequest.getId())
-            !=
-            userRepository.findIdByUsername(username)) {
+                !=
+                userRepository.findIdByUsername(username)) {
             throw new RuntimeException("You are not allowed to update this staff");
         }
         if (!passwordEncoder.matches(
@@ -120,10 +121,34 @@ public class UserService {
         return "Update staff successfully";
     }
 
-    public String deleteStaff(DeleteRequest deleteRequest) {
+    public String deleteStaff(
+            DeleteRequest deleteRequest,
+            HttpServletRequest request
+    ) {
+        final String authorizationHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String username;
+        jwt = authorizationHeader.substring(7);
+        username = jwtService.extractUsername(jwt);
+        if (staffRepository.findShopIdByStaffId(deleteRequest.getId())
+                !=
+                userRepository.findIdByUsername(username)) {
+            throw new RuntimeException("You are not allowed to delete this staff");
+        }
         var user_id = staffRepository.findUserIdById(deleteRequest.getId());
         staffRepository.deleteById((long) deleteRequest.getId());
         userRepository.deleteById(user_id);
         return "Delete staff successfully";
+    }
+
+    public List<Staff> getAllStaff(HttpServletRequest request) {
+        final String authorizationHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String username;
+        jwt = authorizationHeader.substring(7);
+        username = jwtService.extractUsername(jwt);
+        var shop_id = shopRepository.findShopIdByUsername(username);
+        List<Staff> list = staffRepository.findAllByShopId(shop_id);
+        return list;
     }
 }

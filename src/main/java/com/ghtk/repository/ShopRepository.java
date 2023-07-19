@@ -15,4 +15,14 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
     )
     Shop findShopByUsername(String username) throws RuntimeException;
 
+
+    @Query(
+            nativeQuery = true,
+            value = "SELECT s.id " +
+                    "FROM shop s " +
+                    "left join user u " +
+                    "on s.user_id = u.id " +
+                    "WHERE u.username = ?1"
+    )
+    int findShopIdByUsername(String username) ;
 }

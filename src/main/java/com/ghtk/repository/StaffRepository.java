@@ -4,6 +4,8 @@ import com.ghtk.model.Staff;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface StaffRepository extends JpaRepository<Staff, Long> {
     @Query(
             value = "SELECT shop_id FROM staff WHERE id = ?1",
@@ -19,4 +21,9 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     Integer findUserIdById(int staffId);
 
 
+    @Query(
+            value = "SELECT staff.* FROM staff WHERE shop_id = ?1",
+            nativeQuery = true
+    )
+    List<Staff> findAllByShopId(int shopId);
 }

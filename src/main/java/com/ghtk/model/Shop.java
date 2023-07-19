@@ -1,10 +1,9 @@
 package com.ghtk.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -24,14 +23,20 @@ public class Shop {
 
     @OneToOne
     @JoinColumn(name = "user_id")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "shop")
+    @JsonManagedReference
     private List<Staff> staffs;
 
     @OneToMany(mappedBy = "shop")
+    @JsonManagedReference
     private List<Product> products;
 
     @OneToMany(mappedBy = "shop")
+    @JsonManagedReference
     private List<Order> orders;
 }

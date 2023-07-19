@@ -1,5 +1,6 @@
 package com.ghtk.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,12 +29,15 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToOne(mappedBy = "user")
+    @JsonManagedReference
     private Shop shop;
 
     @OneToOne(mappedBy = "user")
+    @JsonManagedReference
     private Staff staff;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<History> histories;
 
     @Override

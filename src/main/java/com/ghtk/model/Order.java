@@ -1,5 +1,6 @@
 package com.ghtk.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,16 +25,19 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
+    @JsonBackReference
     private Shop shop;
 
     @ManyToOne
     @JoinColumn(name = "staff_id")
+    @JsonBackReference
     private Staff staff;
 
     @ManyToMany
     @JoinTable(name = "order_list",
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
+    @JsonBackReference
     private List<Product> products;
 
 }

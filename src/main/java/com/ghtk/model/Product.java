@@ -1,5 +1,7 @@
 package com.ghtk.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,13 +29,16 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
+    @JsonBackReference
     private Shop shop;
 
     @ManyToOne
     @JoinColumn(name = "staff_id")
+    @JsonBackReference
     private Staff staff;
 
     @ManyToMany(mappedBy = "products")
+    @JsonManagedReference
     private List<Order> orders;
 
 }

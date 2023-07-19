@@ -1,5 +1,6 @@
 package com.ghtk.controller.shop.staff_management;
 
+import com.ghtk.model.Staff;
 import com.ghtk.request.DeleteRequest;
 import com.ghtk.request.StaffRegisterRequest;
 import com.ghtk.request.StaffUpdateRequest;
@@ -12,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/shop")
-public class StaffAccountController {
+public class ManageStaffController {
 
     @Autowired
     private final UserService userService;
@@ -40,7 +43,15 @@ public class StaffAccountController {
     }
 
     @DeleteMapping("/delete_staff")
-    public ResponseEntity<String> deleteStaffAccount(@RequestBody DeleteRequest deleteRequest) {
-       return ResponseEntity.ok(userService.deleteStaff(deleteRequest));
+    public ResponseEntity<String> deleteStaffAccount(
+            @RequestBody DeleteRequest deleteRequest,
+            HttpServletRequest request
+    ) {
+       return ResponseEntity.ok(userService.deleteStaff(deleteRequest, request));
+    }
+
+    @GetMapping("/get_all_staff")
+    public ResponseEntity<List<Staff>> getAllStaff(HttpServletRequest request) {
+       return ResponseEntity.ok(userService.getAllStaff(request));
     }
 }
