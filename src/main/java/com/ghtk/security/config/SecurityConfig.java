@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import static com.ghtk.model.Permission.*;
 import static com.ghtk.model.Role.*;
@@ -22,6 +24,7 @@ import static com.ghtk.model.Role.*;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class SecurityConfig {
 
     @Autowired
@@ -36,6 +39,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors
+                    .configurationSource(request -> {
+                        var corsConfiguration = new org.springframework.web.cors.CorsConfiguration();
+                        corsConfiguration.setAllowedOrigins(java.util.List.of("http://localhost:3000"));
+                        corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE"));
+                        corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
+                        return corsConfiguration;
+                    })
+                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/auth/**").permitAll()
@@ -72,7 +84,9 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .permitAll()
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login")
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler(
                                 (request, response, authentication) ->

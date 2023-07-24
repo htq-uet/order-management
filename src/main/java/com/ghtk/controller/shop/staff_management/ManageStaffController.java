@@ -1,9 +1,9 @@
 package com.ghtk.controller.shop.staff_management;
 
 import com.ghtk.model.Staff;
-import com.ghtk.request.DeleteRequest;
-import com.ghtk.request.StaffRegisterRequest;
-import com.ghtk.request.StaffUpdateRequest;
+import com.ghtk.request.staff_manage.DeleteRequest;
+import com.ghtk.request.staff_manage.StaffRegisterRequest;
+import com.ghtk.request.staff_manage.StaffUpdateRequest;
 import com.ghtk.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/shop")
 public class ManageStaffController {
 

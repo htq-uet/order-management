@@ -1,4 +1,4 @@
-package com.ghtk.request;
+package com.ghtk.request.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

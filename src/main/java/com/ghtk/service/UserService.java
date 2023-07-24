@@ -5,10 +5,10 @@ import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
 import com.ghtk.repository.StaffRepository;
 import com.ghtk.repository.UserRepository;
-import com.ghtk.request.DeleteRequest;
-import com.ghtk.request.StaffRegisterRequest;
+import com.ghtk.request.staff_manage.DeleteRequest;
+import com.ghtk.request.staff_manage.StaffRegisterRequest;
 
-import com.ghtk.request.StaffUpdateRequest;
+import com.ghtk.request.staff_manage.StaffUpdateRequest;
 import com.ghtk.security.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -76,7 +76,8 @@ public class UserService {
             HttpServletResponse response) {
         final String authorizationHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
+        final String username ;
+
         jwt = authorizationHeader.substring(7);
         username = jwtService.extractUsername(jwt);
         if (staffRepository.findShopIdByStaffId(staffUpdateRequest.getId())

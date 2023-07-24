@@ -5,8 +5,8 @@ import com.ghtk.model.Shop;
 import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
 import com.ghtk.repository.UserRepository;
-import com.ghtk.request.LoginRequest;
-import com.ghtk.request.ShopRegisterRequest;
+import com.ghtk.request.auth.LoginRequest;
+import com.ghtk.request.auth.ShopRegisterRequest;
 import com.ghtk.response.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -80,14 +80,14 @@ public class AuthenticationService {
                         loginRequest.getPassword()
                 )
         );
-        var user = userRepository.findUserByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findUserByUsername(loginRequest.getUsername());
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
         redisTemplate.opsForValue().set("access_token_" + user.getId(), jwtToken);
         redisTemplate.opsForValue().set("refresh_token_" + user.getId(), refreshToken);
 
+        System.out.println(jwtToken);
 
         return AuthenticationResponse.builder()
                 .access_token(jwtToken)
@@ -110,8 +110,7 @@ public class AuthenticationService {
         refreshToken = authorizationHeader.substring(7);
         username = jwtService.extractUsername(refreshToken);
         if (username != null) {
-            var userDetails = this.userRepository.findUserByUsername(username)
-                    .orElseThrow();
+            var userDetails = this.userRepository.findUserByUsername(username);
             if (jwtService.isTokenValid(refreshToken, userDetails)) {
                 var accessToken = jwtService.generateToken(userDetails);
                 var authResponse = AuthenticationResponse.builder()

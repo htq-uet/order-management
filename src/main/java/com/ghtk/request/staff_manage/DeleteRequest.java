@@ -1,4 +1,4 @@
-package com.ghtk.request;
+package com.ghtk.request.staff_manage;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

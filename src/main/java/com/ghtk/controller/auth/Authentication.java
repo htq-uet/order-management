@@ -1,7 +1,7 @@
 package com.ghtk.controller.auth;
 
-import com.ghtk.request.LoginRequest;
-import com.ghtk.request.ShopRegisterRequest;
+import com.ghtk.request.auth.LoginRequest;
+import com.ghtk.request.auth.ShopRegisterRequest;
 import com.ghtk.response.AuthenticationResponse;
 import com.ghtk.security.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,14 +10,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class Authentication {
@@ -45,4 +43,9 @@ public class Authentication {
             HttpServletResponse response) throws IOException {
         authenticationService.refresh(request, response);
     }
+
+//    @GetMapping("/logout")
+//    public void logout() {
+//
+//    }
 }
