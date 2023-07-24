@@ -29,28 +29,40 @@ public class ProductService {
 
     public String addProduct(
             AddProductRequest addProductRequest,
-            HttpServletRequest request
+            HttpServletRequest request,
+            String action
     ) {
         String username = request.getUserPrincipal().getName();
         User user = userRepository.findUserByUsername(username);
+        boolean productExists = productRepository.findProductByName(addProductRequest.getName()) != null;
         var product = Product.builder()
                 .name(addProductRequest.getName())
                 .shop(user.getShop())
-                .created_at(LocalDateTime.now())
+                .staff(user.getStaff())
+                .created_at(
+                        productExists ?
+                                productRepository.findProductByName(addProductRequest.getName()).getCreated_at()
+                                :
+                                LocalDateTime.now()
+                )
+                .updated_at(LocalDateTime.now())
                 .price(addProductRequest.getPrice())
                 .build();
-        if (productRepository.findProductByName(product.getName()) != null) {
+        if (productExists && action.equals("Add product")) {
             throw new RuntimeException("Product name already exists");
+        }
+        if (productExists) {
+            product.setId(productRepository.findProductByName(addProductRequest.getName()).getId());
         }
         productRepository.save(product);
 //        int productId = product.getId();
 
         var history = History.builder()
                 .user(user)
-                .action("Add product")
+                .action(productExists ? "Update product" : "Add product")
                 .time(LocalDateTime.now())
                 .content(
-                        "Add product "
+                        (productExists ? "Update product " : "Add product ")
                                 +
                                 addProductRequest.getName()
                                 +
@@ -64,6 +76,6 @@ public class ProductService {
                 .build();
         historyRepository.save(history);
 
-        return "Product added successfully";
+        return productExists ? "Update product successfully" : "Add product successfully";
     }
 }

@@ -22,6 +22,14 @@ public class ManageProductController {
             @RequestBody AddProductRequest addProductRequest,
             HttpServletRequest request
     ) {
-        return ResponseEntity.ok(productService.addProduct(addProductRequest, request));
+        return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Add product"));
+    }
+
+    @PutMapping("/update_product")
+    public ResponseEntity<String> updateProduct(
+            @RequestBody AddProductRequest addProductRequest,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Update product"));
     }
 }
