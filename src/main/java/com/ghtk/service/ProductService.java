@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @Service
@@ -31,13 +32,17 @@ public class ProductService {
             AddProductRequest addProductRequest,
             HttpServletRequest request,
             String action
-    ) {
+    ) throws AccessDeniedException {
         String username = request.getUserPrincipal().getName();
         User user = userRepository.findUserByUsername(username);
         boolean productExists = productRepository.findProductByName(addProductRequest.getName()) != null;
+        if (productExists && user.getId() != productRepository.findCreatorByName(addProductRequest.getName()))
+        {
+            throw new AccessDeniedException("You are not allowed to do this action");
+        }
         var product = Product.builder()
                 .name(addProductRequest.getName())
-                .shop(user.getShop())
+                .shop(user.getShop() == null ? user.getStaff().getShop() : user.getShop())
                 .staff(user.getStaff())
                 .created_at(
                         productExists ?
@@ -77,5 +82,31 @@ public class ProductService {
         historyRepository.save(history);
 
         return productExists ? "Update product successfully" : "Add product successfully";
+    }
+
+    public String deleteProduct(Integer id, HttpServletRequest request) throws AccessDeniedException {
+        String username = request.getUserPrincipal().getName();
+        User user = userRepository.findUserByUsername(username);
+        Product product = productRepository.findById(id);
+        if (product == null) {
+            throw new RuntimeException("Product not found");
+        }
+        Integer product_user_id = productRepository.findCreatorByName(product.getName());
+
+        if (user.getId() != product_user_id)
+        {
+            throw new AccessDeniedException("You are not allowed to do this action");
+        }
+
+
+        productRepository.delete(product);
+        var history = History.builder()
+                .user(user)
+                .action("Delete product")
+                .time(LocalDateTime.now())
+                .content("Delete product " + product.getName() + " by " + username)
+                .build();
+        historyRepository.save(history);
+        return "Delete product successfully";
     }
 }

@@ -1,4 +1,4 @@
-package com.ghtk.controller.shop.product_management;
+package com.ghtk.controller.product_management;
 
 import com.ghtk.request.product_manage.AddProductRequest;
 import com.ghtk.service.ProductService;
@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/shop")
+@RequestMapping(value = {"/shop", "/staff"})
 public class ManageProductController {
 
     @Autowired
@@ -21,7 +23,7 @@ public class ManageProductController {
     public ResponseEntity<String> createNewProduct(
             @RequestBody AddProductRequest addProductRequest,
             HttpServletRequest request
-    ) {
+    ) throws AccessDeniedException {
         return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Add product"));
     }
 
@@ -29,7 +31,16 @@ public class ManageProductController {
     public ResponseEntity<String> updateProduct(
             @RequestBody AddProductRequest addProductRequest,
             HttpServletRequest request
-    ) {
+    ) throws AccessDeniedException {
         return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Update product"));
     }
+
+    @DeleteMapping("/delete_product")
+    public ResponseEntity<String> deleteProduct(
+            @RequestParam("id") Integer id,
+            HttpServletRequest request
+    ) throws AccessDeniedException {
+        return ResponseEntity.ok(productService.deleteProduct(id, request));
+    }
+
 }
