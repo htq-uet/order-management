@@ -36,7 +36,8 @@ public class Order {
     @ManyToMany
     @JoinTable(name = "order_list",
             joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
     @JsonBackReference
     private List<Product> products;
 

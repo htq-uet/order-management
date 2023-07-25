@@ -1,6 +1,8 @@
 package com.ghtk.repository;
 
 import com.ghtk.model.Product;
+import com.ghtk.model.Shop;
+import com.ghtk.model.Staff;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +26,24 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     """
     )
     Integer findCreatorByName(@Param("name") String name);
+
+    @Query(
+            nativeQuery = true,
+            value = """
+            SELECT *
+            FROM product
+            WHERE staff_id = ?1
+"""
+    )
+    Product findAllByStaff(Integer id);
+
+    @Query(
+            nativeQuery = true,
+            value = """
+            SELECT *
+            FROM product
+            WHERE shop_id = ?1
+"""
+    )
+    Product findAllByShop(Integer id);
 }

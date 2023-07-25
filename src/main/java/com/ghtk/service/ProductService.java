@@ -109,4 +109,13 @@ public class ProductService {
         historyRepository.save(history);
         return "Delete product successfully";
     }
+
+    public Product getAllProducts(HttpServletRequest request) {
+        String username = request.getUserPrincipal().getName();
+        User user = userRepository.findUserByUsername(username);
+        if (user.getShop() == null) {
+            return productRepository.findAllByShop(user.getStaff().getShop().getId());
+        }
+        return productRepository.findAllByShop(user.getShop().getId());
+    }
 }

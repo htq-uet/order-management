@@ -18,6 +18,13 @@ public class ManageProductController {
     @Autowired
     private final ProductService productService;
 
+    @GetMapping("/get_all_products")
+    public ResponseEntity<?> getAllProducts(
+            HttpServletRequest request
+    ) throws AccessDeniedException {
+        return ResponseEntity.ok(productService.getAllProducts(request));
+    }
+
 
     @PostMapping("/create_new_product")
     public ResponseEntity<String> createNewProduct(

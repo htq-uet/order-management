@@ -26,4 +26,11 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
             nativeQuery = true
     )
     List<Staff> findAllByShopId(int shopId);
+
+
+    @Query(
+            nativeQuery = true,
+            value = "SELECT * FROM staff s left join user u on s.user_id = u.id where u.username = ?1"
+    )
+    Staff findStaffByUsername(String username);
 }
