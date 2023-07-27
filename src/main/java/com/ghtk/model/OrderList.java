@@ -14,19 +14,18 @@ import java.nio.CharBuffer;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@IdClass(OrderListId.class)
 @Table(name = "order_list")
 public class OrderList {
     @Id
-    @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "order_id")
-    private Order order;
+    private int order_id;
 
     @Id
-    @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "product_id")
-    private Product product;
+    private int product_id;
 
     @Column(name = "quantity")
     private int quantity;
