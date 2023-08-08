@@ -1,12 +1,12 @@
 package com.ghtk.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.ghtk.model.Role;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,5 +17,8 @@ public class AuthenticationResponse {
 
     @JsonProperty("refresh_token")
     private String refresh_token;
+
+    @JsonProperty("role")
+    private Role role;
 
 }

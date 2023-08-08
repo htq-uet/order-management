@@ -1,7 +1,6 @@
 package com.ghtk.controller.shop.staff_management;
 
-import com.ghtk.model.Staff;
-import com.ghtk.request.staff_manage.DeleteRequest;
+import com.ghtk.model.DTO.StaffDTO;
 import com.ghtk.request.staff_manage.StaffRegisterRequest;
 import com.ghtk.request.staff_manage.StaffUpdateRequest;
 import com.ghtk.service.UserService;
@@ -43,16 +42,17 @@ public class ManageStaffController {
        return ResponseEntity.ok(userService.updateStaff(staffUpdateRequest, request , response));
     }
 
-    @DeleteMapping("/delete_staff")
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PutMapping("/delete_staff")
     public ResponseEntity<String> deleteStaffAccount(
-            @RequestBody DeleteRequest deleteRequest,
+            @RequestParam int staffId,
             HttpServletRequest request
     ) {
-       return ResponseEntity.ok(userService.deleteStaff(deleteRequest, request));
+       return ResponseEntity.ok(userService.deleteStaff(staffId, request));
     }
 
     @GetMapping("/get_all_staff")
-    public ResponseEntity<List<Staff>> getAllStaff(HttpServletRequest request) {
+    public ResponseEntity<List<StaffDTO>> getAllStaff(HttpServletRequest request) {
        return ResponseEntity.ok(userService.getAllStaff(request));
     }
 }

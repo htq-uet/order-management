@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ghtk.model.Shop;
 import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
+import com.ghtk.repository.StaffRepository;
 import com.ghtk.repository.UserRepository;
 import com.ghtk.request.auth.LoginRequest;
 import com.ghtk.request.auth.ShopRegisterRequest;
@@ -20,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,9 @@ public class AuthenticationService {
 
     @Autowired
     private final ShopRepository shopRepository;
+
+    @Autowired
+    private final StaffRepository staffRepository;
 
     @Autowired
     private final PasswordEncoder passwordEncoder;
@@ -70,10 +76,11 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .access_token(jwtToken)
                 .refresh_token(refreshToken)
+                .role(user.getRole())
                 .build();
     }
 
-    public AuthenticationResponse login(LoginRequest loginRequest) {
+    public AuthenticationResponse login(LoginRequest loginRequest) throws AccessDeniedException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -81,6 +88,10 @@ public class AuthenticationService {
                 )
         );
         var user = userRepository.findUserByUsername(loginRequest.getUsername());
+        if (Objects.equals(staffRepository.getStatusByUsername(loginRequest.getUsername()), "deactivated")) {
+            throw new AccessDeniedException("Account is deactivated");
+        }
+
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
@@ -92,6 +103,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .access_token(jwtToken)
                 .refresh_token(refreshToken)
+                .role(user.getRole())
                 .build();
     }
 
@@ -116,6 +128,7 @@ public class AuthenticationService {
                 var authResponse = AuthenticationResponse.builder()
                         .access_token(accessToken)
                         .refresh_token(refreshToken)
+                        .role(userDetails.getRole())
                         .build();
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }

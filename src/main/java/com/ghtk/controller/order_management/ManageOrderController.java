@@ -1,5 +1,8 @@
 package com.ghtk.controller.order_management;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ghtk.model.DTO.OrderDTO;
+import com.ghtk.model.DTO.OrderListDTO;
 import com.ghtk.model.DTO.ProductDTO;
 import com.ghtk.model.Order;
 import com.ghtk.model.Product;
@@ -24,27 +27,30 @@ public class ManageOrderController {
     private final OrderService orderService;
 
     @PostMapping("/create_new_order")
-    public ResponseEntity<String> createNewOrder(@RequestBody CreateOrderRequest createOrderRequest, HttpServletRequest request) {
+    public ResponseEntity<String> createNewOrder(@RequestBody CreateOrderRequest createOrderRequest, HttpServletRequest request) throws JsonProcessingException {
         return ResponseEntity.ok(orderService.createNewOrder(createOrderRequest, request));
     }
 
     @PutMapping("/update_order")
-    public ResponseEntity<String> updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest, HttpServletRequest request) throws AccessDeniedException {
+    public ResponseEntity<String> updateOrder(
+            @RequestBody UpdateOrderRequest updateOrderRequest,
+            HttpServletRequest request)
+            throws AccessDeniedException, JsonProcessingException {
         return ResponseEntity.ok(orderService.updateOrder(updateOrderRequest, request));
     }
 
     @GetMapping("/get_order_list")
-    public ResponseEntity<List<Order>> getOrderList(HttpServletRequest request) throws AccessDeniedException {
+    public ResponseEntity<List<OrderDTO>> getOrderList(HttpServletRequest request) throws AccessDeniedException {
         return ResponseEntity.ok(orderService.getOrderList(request));
     }
 
     @GetMapping("/get_order")
-    public ResponseEntity<List<ProductDTO>> getOrder(@RequestParam int order_id, HttpServletRequest request) throws AccessDeniedException {
+    public ResponseEntity<List<OrderListDTO>> getOrder(@RequestParam int order_id, HttpServletRequest request) throws AccessDeniedException {
         return ResponseEntity.ok(orderService.getOrder(order_id, request));
     }
 
     @DeleteMapping("/delete_order")
-    public ResponseEntity<String> deleteOrder(@RequestParam int order_id, HttpServletRequest request) throws AccessDeniedException {
+    public ResponseEntity<String> deleteOrder(@RequestParam int order_id, HttpServletRequest request) throws AccessDeniedException, JsonProcessingException {
         return ResponseEntity.ok(orderService.deleteOrder(order_id, request));
     }
 }

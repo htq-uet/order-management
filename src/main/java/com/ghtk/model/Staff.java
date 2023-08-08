@@ -8,7 +8,9 @@ import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class Staff {
     private int id;
     private String name;
     private String phone;
+    private String status;
 
     @OneToOne
     @JoinColumn(name = "user_id")

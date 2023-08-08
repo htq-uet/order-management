@@ -1,5 +1,8 @@
 package com.ghtk.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ghtk.model.DTO.ProductDTO;
 import com.ghtk.model.History;
 import com.ghtk.model.Product;
 import com.ghtk.model.User;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +32,13 @@ public class ProductService {
     @Autowired
     private final HistoryRepository historyRepository;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     public String addProduct(
             AddProductRequest addProductRequest,
             HttpServletRequest request,
             String action
-    ) throws AccessDeniedException {
+    ) throws AccessDeniedException, JsonProcessingException {
         String username = request.getUserPrincipal().getName();
         User user = userRepository.findUserByUsername(username);
         boolean productExists = productRepository.findProductByName(addProductRequest.getName()) != null;
@@ -67,17 +73,8 @@ public class ProductService {
                 .action(productExists ? "Update product" : "Add product")
                 .time(LocalDateTime.now())
                 .content(
-                        (productExists ? "Update product " : "Add product ")
-                                +
-                                addProductRequest.getName()
-                                +
-                                " with price "
-                                +
-                                addProductRequest.getPrice()
-                                +
-                                " by "
-                                +
-                                username)
+                            objectMapper.writeValueAsString(addProductRequest)
+                )
                 .build();
         historyRepository.save(history);
 
@@ -110,7 +107,7 @@ public class ProductService {
         return "Delete product successfully";
     }
 
-    public Product getAllProducts(HttpServletRequest request) {
+    public List<ProductDTO> getAllProducts(HttpServletRequest request) {
         String username = request.getUserPrincipal().getName();
         User user = userRepository.findUserByUsername(username);
         if (user.getShop() == null) {

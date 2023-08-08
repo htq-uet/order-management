@@ -1,19 +1,22 @@
 package com.ghtk.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ghtk.model.*;
-import com.ghtk.model.DTO.ProductDTO;
+import com.ghtk.model.DTO.OrderDTO;
+import com.ghtk.model.DTO.OrderListDTO;
 import com.ghtk.repository.*;
 import com.ghtk.request.order_manage.CreateOrderRequest;
+import com.ghtk.request.order_manage.OrderItem;
 import com.ghtk.request.order_manage.UpdateOrderRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +41,9 @@ public class OrderService {
     @Autowired
     private final OrderListRepository orderListRepository;
 
-    public String createNewOrder(CreateOrderRequest createOrderRequest, HttpServletRequest request) {
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    public String createNewOrder(CreateOrderRequest createOrderRequest, HttpServletRequest request) throws JsonProcessingException {
         List<Product> products = orderRepository.findProductsByIds(
                 createOrderRequest
                         .product_ids.keySet()
@@ -86,16 +91,14 @@ public class OrderService {
                 .action("Create order")
                 .time(order.getCreated_at())
                 .content(
-                        "Create order " + order.getId()
-                        + " with " + order.getProducts().size() + " products"
-                        + " by " + username
+                        objectMapper.writeValueAsString(createOrderRequest)
                 )
                 .build();
         historyRepository.save(history);
         return "Order created";
     }
 
-    public String updateOrder(UpdateOrderRequest updateOrderRequest, HttpServletRequest request) throws AccessDeniedException {
+    public String updateOrder(UpdateOrderRequest updateOrderRequest, HttpServletRequest request) throws AccessDeniedException, JsonProcessingException {
         int creatorId = orderRepository.findCreatorById(updateOrderRequest.order_id);
         String username = request.getUserPrincipal().getName();
 
@@ -123,10 +126,42 @@ public class OrderService {
         order.setUpdated_at(LocalDateTime.now());
         orderRepository.save(order);
 
+        Set<Integer> updatedProductIds = new HashSet<>();
+
+
+
         for (Product product : order.getProducts()) {
-            var orderList = orderListRepository.findById(order.getId(), product.getId());
-            orderList.setQuantity(updateOrderRequest.product_ids.get(String.valueOf(product.getId())).quantity);
-            orderListRepository.save(orderList);
+            updatedProductIds.add(product.getId());
+            if (updateOrderRequest.product_ids.containsKey(String.valueOf(product.getId()))) {
+                var orderList = orderListRepository.findById(order.getId(), product.getId());
+                orderList.setQuantity(updateOrderRequest.product_ids.get(String.valueOf(product.getId())).quantity);
+                orderListRepository.save(orderList);
+            }
+            else {
+                orderListRepository.deleteByOrderIdAndProductId(order.getId(), product.getId());
+            }
+        }
+
+        int orderId = Integer.parseInt(updateOrderRequest.order_id);
+        Map<String, OrderItem> productIds = updateOrderRequest.product_ids;
+
+        for (Map.Entry<String, OrderItem> entry : productIds.entrySet()) {
+            int productId = Integer.parseInt(entry.getKey());
+            if (!updatedProductIds.contains(productId)) {
+                int quantity = entry.getValue().quantity;
+                // Update the existing OrderList or create a new one with the given productId and quantity
+                var orderList = OrderList.builder()
+                                .order_id(orderId)
+                                .product_id(productId)
+                                .quantity(quantity)
+                                .build();
+
+                // Set the updated quantity
+                orderList.setQuantity(quantity);
+
+                // Save the OrderList to the repository
+                orderListRepository.save(orderList);
+            }
         }
 
         var history = History.builder()
@@ -134,16 +169,14 @@ public class OrderService {
                 .action("Update order")
                 .time(order.getUpdated_at())
                 .content(
-                        "Update order " + order.getId()
-                                + " with " + order.getProducts().size() + " products"
-                                + " by " + username
+                        objectMapper.writeValueAsString(updateOrderRequest)
                 )
                 .build();
         historyRepository.save(history);
         return "Order updated";
     }
 
-    public List<Order> getOrderList(HttpServletRequest request) {
+    public List<OrderDTO> getOrderList(HttpServletRequest request) {
         String username = request.getUserPrincipal().getName();
 
         Staff staff = null;
@@ -163,7 +196,7 @@ public class OrderService {
         return Collections.emptyList();
     }
 
-    public List<ProductDTO> getOrder(int orderId, HttpServletRequest request) throws AccessDeniedException {
+    public List<OrderListDTO> getOrder(int orderId, HttpServletRequest request) throws AccessDeniedException {
         String username = request.getUserPrincipal().getName();
         boolean accessDenied = checkAccess(username, orderId);
 
@@ -172,11 +205,11 @@ public class OrderService {
         }
         else {
             List<Integer> productIds = orderListRepository.findProductIdsByOrderId(orderId);
-            return orderRepository.findOrderProductsById(productIds);
+            return orderRepository.findOrderProductsById(productIds, orderId);
         }
     }
 
-    public String deleteOrder(int orderId, HttpServletRequest request) throws AccessDeniedException {
+    public String deleteOrder(int orderId, HttpServletRequest request) throws AccessDeniedException, JsonProcessingException {
         String username = request.getUserPrincipal().getName();
         boolean accessDenied = checkAccess(username, orderId);
 
@@ -185,8 +218,18 @@ public class OrderService {
         }
         else {
             orderRepository.deleteById((long) orderId);
+            var history = History.builder()
+                    .user(userRepository.findUserByUsername(username))
+                    .action("Delete order")
+                    .time(LocalDateTime.now())
+                    .content(
+                            objectMapper.writeValueAsString("orderId:" + orderId )
+                    )
+                    .build();
+            historyRepository.save(history);
             return "Order deleted";
     }
+
 }
 
     private boolean checkAccess(String username, int orderId) {

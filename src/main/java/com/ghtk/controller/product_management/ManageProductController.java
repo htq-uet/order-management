@@ -1,5 +1,6 @@
 package com.ghtk.controller.product_management;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ghtk.request.product_manage.AddProductRequest;
 import com.ghtk.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,7 @@ public class ManageProductController {
     public ResponseEntity<String> createNewProduct(
             @RequestBody AddProductRequest addProductRequest,
             HttpServletRequest request
-    ) throws AccessDeniedException {
+    ) throws AccessDeniedException, JsonProcessingException {
         return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Add product"));
     }
 
@@ -38,7 +39,7 @@ public class ManageProductController {
     public ResponseEntity<String> updateProduct(
             @RequestBody AddProductRequest addProductRequest,
             HttpServletRequest request
-    ) throws AccessDeniedException {
+    ) throws AccessDeniedException, JsonProcessingException {
         return ResponseEntity.ok(productService.addProduct(addProductRequest, request, "Update product"));
     }
 

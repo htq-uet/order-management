@@ -1,11 +1,11 @@
 package com.ghtk.service;
 
+import com.ghtk.model.DTO.StaffDTO;
 import com.ghtk.model.Staff;
 import com.ghtk.model.User;
 import com.ghtk.repository.ShopRepository;
 import com.ghtk.repository.StaffRepository;
 import com.ghtk.repository.UserRepository;
-import com.ghtk.request.staff_manage.DeleteRequest;
 import com.ghtk.request.staff_manage.StaffRegisterRequest;
 
 import com.ghtk.request.staff_manage.StaffUpdateRequest;
@@ -63,6 +63,7 @@ public class UserService {
         var staff = Staff.builder()
                 .name(staffRegisterRequest.getName())
                 .phone(staffRegisterRequest.getPhone())
+                .status(staffRegisterRequest.getStatus())
                 .user(user)
                 .shop(shop)
                 .build();
@@ -82,38 +83,23 @@ public class UserService {
         username = jwtService.extractUsername(jwt);
         if (staffRepository.findShopIdByStaffId(staffUpdateRequest.getId())
                 !=
-                userRepository.findIdByUsername(username)) {
+                shopRepository.findShopIdByUsername(username)) {
             throw new RuntimeException("You are not allowed to update this staff");
-        }
-        if (!passwordEncoder.matches(
-                staffUpdateRequest.getPassword(),
-                userRepository.findPasswordByUsername(staffUpdateRequest.getUsername()))) {
-            throw new RuntimeException("Password is incorrect");
-        }
-        if (staffUpdateRequest.getNewPassword() != null) {
-            if (staffUpdateRequest.getNewPassword().equals(staffUpdateRequest.getPassword())) {
-                throw new RuntimeException("New password must be different from old password");
-            }
-        }
-        if (!Objects.equals(staffUpdateRequest.getNewPassword(), staffUpdateRequest.getConfirmPassword())) {
-            throw new RuntimeException("Confirm password is incorrect");
         }
 
         var shop = shopRepository.findShopByUsername(username);
-        var user = User.builder()
-                .id(staffUpdateRequest.getUser_id())
-                .username(staffUpdateRequest.getUsername())
-                .password(staffUpdateRequest.getNewPassword() == null ?
-                        passwordEncoder.encode(staffUpdateRequest.getPassword())
-                        :
-                        passwordEncoder.encode(staffUpdateRequest.getNewPassword()))
-                .role(staffUpdateRequest.getRole())
-                .build();
-        userRepository.save(user);
+
+        User user = userRepository.findUserByUsername(staffUpdateRequest.getUsername());
+        if(staffUpdateRequest.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(staffUpdateRequest.getPassword()));
+            userRepository.save(user);
+        }
+
 
         var staff = Staff.builder()
                 .id(staffUpdateRequest.getId())
                 .name(staffUpdateRequest.getName())
+                .status(staffUpdateRequest.getStatus())
                 .phone(staffUpdateRequest.getPhone())
                 .user(user)
                 .shop(shop)
@@ -123,7 +109,7 @@ public class UserService {
     }
 
     public String deleteStaff(
-            DeleteRequest deleteRequest,
+            int staffId,
             HttpServletRequest request
     ) {
         final String authorizationHeader = request.getHeader("Authorization");
@@ -131,25 +117,27 @@ public class UserService {
         final String username;
         jwt = authorizationHeader.substring(7);
         username = jwtService.extractUsername(jwt);
-        if (staffRepository.findShopIdByStaffId(deleteRequest.getId())
+        if (staffRepository.findShopIdByStaffId(staffId)
                 !=
-                userRepository.findIdByUsername(username)) {
+                shopRepository.findShopIdByUsername(username) ){
             throw new RuntimeException("You are not allowed to delete this staff");
         }
-        var user_id = staffRepository.findUserIdById(deleteRequest.getId());
-        staffRepository.deleteById((long) deleteRequest.getId());
-        userRepository.deleteById(user_id);
-        return "Delete staff successfully";
+
+        var staff = staffRepository.findStaffById(staffId);
+        staff.setStatus("deactivated");
+
+        staffRepository.save(staff);
+        return "Deactivate staff successfully";
     }
 
-    public List<Staff> getAllStaff(HttpServletRequest request) {
+    public List<StaffDTO> getAllStaff(HttpServletRequest request) {
         final String authorizationHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
         jwt = authorizationHeader.substring(7);
         username = jwtService.extractUsername(jwt);
         var shop_id = shopRepository.findShopIdByUsername(username);
-        List<Staff> list = staffRepository.findAllByShopId(shop_id);
+        List<StaffDTO> list = staffRepository.findAllByShopId(shop_id);
         return list;
     }
 }

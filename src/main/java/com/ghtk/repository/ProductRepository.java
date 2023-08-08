@@ -1,11 +1,15 @@
 package com.ghtk.repository;
 
+import com.ghtk.model.DTO.ProductDTO;
+import com.ghtk.model.DTO.TotalProductDTO;
 import com.ghtk.model.Product;
 import com.ghtk.model.Shop;
 import com.ghtk.model.Staff;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -40,10 +44,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(
             nativeQuery = true,
             value = """
-            SELECT *
-            FROM product
+            SELECT p.id, p.name, p.price, p.created_at, p.updated_at
+            FROM product p
             WHERE shop_id = ?1
 """
     )
-    Product findAllByShop(Integer id);
+    List<ProductDTO> findAllByShop(Integer id);
+
+    @Query(
+            nativeQuery = true,
+            value = """
+            SELECT COUNT(*) as total FROM product
+            WHERE shop_id = ?4
+              AND (YEAR(created_at) = ?1 OR ?1 IS NULL )
+              AND (MONTH(created_at) = ?2 OR ?2 IS NULL )
+              AND (DAY(created_at) = ?3 OR ?3 IS NULL )
+"""
+    )
+    TotalProductDTO countProductsByDateLike(String year, String month, String day, int shopId);
 }

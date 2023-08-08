@@ -2,15 +2,14 @@ package com.ghtk.request.auth;
 
 import com.ghtk.model.Role;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import static com.ghtk.model.Role.SHOP;
 
 
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

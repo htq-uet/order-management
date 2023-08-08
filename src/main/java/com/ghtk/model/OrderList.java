@@ -2,15 +2,14 @@ package com.ghtk.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.nio.CharBuffer;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,7 +27,7 @@ public class OrderList {
     private int product_id;
 
     @Column(name = "quantity")
-    private int quantity;
+    private Integer quantity;
 
 
     // Constructors, getters, and setters

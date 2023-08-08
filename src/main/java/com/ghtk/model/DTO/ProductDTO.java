@@ -14,18 +14,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class ProductDTO {
+public interface ProductDTO {
 
-    private int id;
-    private String name;
-    private int price;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
-
+    int getID();
+    String getName();
+    int getPrice();
+    LocalDateTime getCreated_at();
+    LocalDateTime getUpdated_at();
 
 
 }

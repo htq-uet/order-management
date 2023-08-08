@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -33,7 +34,7 @@ public class Authentication {
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody LoginRequest loginRequest
-    ) {
+    ) throws AccessDeniedException {
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
