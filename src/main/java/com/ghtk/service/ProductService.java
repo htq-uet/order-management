@@ -6,6 +6,7 @@ import com.ghtk.model.DTO.ProductDTO;
 import com.ghtk.model.History;
 import com.ghtk.model.Product;
 import com.ghtk.model.User;
+import com.ghtk.repository.ESRepo.ProductESRepository;
 import com.ghtk.repository.HistoryRepository;
 import com.ghtk.repository.ProductRepository;
 import com.ghtk.repository.UserRepository;
@@ -25,6 +26,9 @@ public class ProductService {
 
     @Autowired
     private final ProductRepository productRepository;
+
+    @Autowired
+    private final ProductESRepository productESRepository;
 
     @Autowired
     private final UserRepository userRepository;
@@ -95,7 +99,8 @@ public class ProductService {
             throw new AccessDeniedException("You are not allowed to do this action");
         }
 
-
+        // Delete product in ES
+        productESRepository.deleteById(id);
         productRepository.delete(product);
         var history = History.builder()
                 .user(user)
@@ -107,12 +112,32 @@ public class ProductService {
         return "Delete product successfully";
     }
 
-    public List<ProductDTO> getAllProducts(HttpServletRequest request) {
+    public List<ProductDTO> getAllProducts(HttpServletRequest request, Integer page) {
         String username = request.getUserPrincipal().getName();
         User user = userRepository.findUserByUsername(username);
-        if (user.getShop() == null) {
-            return productRepository.findAllByShop(user.getStaff().getShop().getId());
+        Integer shopId = (user.getShop() != null) ? user.getShop().getId() : user.getStaff().getShop().getId();
+
+        LocalDateTime lastCreatedAt = LocalDateTime.now();
+
+        if (page != null && page > 1) {
+            List<ProductDTO> firstPage = productRepository.findAllByShop(shopId, lastCreatedAt);
+
+            if (page == 2) {
+                lastCreatedAt = firstPage.get(firstPage.size() - 1).getUpdated_at();
+            } else {
+                int remainingPages = page - 2;
+
+                for (int i = 0; i < remainingPages; i++) {
+                    List<ProductDTO> nextPage = productRepository.findAllByShop(shopId, lastCreatedAt);
+                    if (nextPage.isEmpty()) {
+                        break;
+                    }
+                    lastCreatedAt = nextPage.get(nextPage.size() - 1).getUpdated_at();
+                }
+            }
+
         }
-        return productRepository.findAllByShop(user.getShop().getId());
+        return productRepository.findAllByShop(shopId, lastCreatedAt);
     }
+
 }

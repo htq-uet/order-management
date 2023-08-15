@@ -19,7 +19,7 @@ import java.util.List;
 public class Staff {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "increment")
-    private int id;
+    private Integer id;
     private String name;
     private String phone;
     private String status;

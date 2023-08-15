@@ -33,4 +33,20 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             value = "SELECT role from user where username = ?1"
     )
     String findRoleByUsername(String username);
+
+    @Query(
+            nativeQuery = true,
+            value = "SELECT s.shop_id " +
+                    "FROM staff s " +
+                    "left join user u " +
+                    "on s.user_id = u.id " +
+                    "WHERE u.username = ?1 " +
+                    "UNION " +
+                    "SELECT sh.id " +
+                    "FROM shop sh " +
+                    "left join user u " +
+                    "on sh.user_id = u.id " +
+                    "WHERE u.username =?1"
+    )
+    Integer findShopIdByUsername(String username) ;
 }

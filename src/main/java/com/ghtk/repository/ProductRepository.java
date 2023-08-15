@@ -9,9 +9,11 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
 
     @Query(nativeQuery = true, value = "SELECT * FROM product WHERE name = ?1")
     Product findProductByName(String name);
@@ -46,10 +48,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             value = """
             SELECT p.id, p.name, p.price, p.created_at, p.updated_at
             FROM product p
-            WHERE shop_id = ?1
+            WHERE p.shop_id = ?1
+            AND p.updated_at < ?2
+            ORDER BY p.updated_at DESC
+            LIMIT 20
 """
     )
-    List<ProductDTO> findAllByShop(Integer id);
+    List<ProductDTO> findAllByShop(Integer id, LocalDateTime lastUpdatedAt);
 
     @Query(
             nativeQuery = true,
@@ -62,4 +67,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 """
     )
     TotalProductDTO countProductsByDateLike(String year, String month, String day, int shopId);
+
+    @Query(
+            nativeQuery = true,
+            value = """
+            SELECT * FROM product
+            WHERE updated_at > ?1
+    """
+    )
+    List<Product> findByUpdatedAtGreaterThan(LocalDateTime lastSyncTime);
 }

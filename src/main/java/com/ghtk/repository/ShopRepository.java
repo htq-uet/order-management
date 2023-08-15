@@ -22,7 +22,8 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
                     "FROM shop s " +
                     "left join user u " +
                     "on s.user_id = u.id " +
-                    "WHERE u.username = ?1"
+                    "WHERE u.username = ?1 "
+
     )
     int findShopIdByUsername(String username) ;
 }
